@@ -1,19 +1,371 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Science Quiz</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>Science Quiz Game</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+    }
+    #intro {
+      position: fixed;
+      inset: 0;
+      background: #007BFF;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+      animation: fadeIn 1.5s;
+    }
+    #quiz, #shop-container, #timer, #streakDisplay, #abilities {
+      display: none;
+    }
+    #quiz {
+      max-width: 600px;
+      margin: 80px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    .option {
+      background: #e0e0e0;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .option:hover {
+      background: #ccc;
+    }
+    #submit {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      display: none;
+    }
+    #feedback {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    #shop-container {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      background: #ffc107;
+      padding: 10px;
+      border-radius: 6px;
+    }
+    #timer {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: #dc3545;
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    #streakDisplay {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #fff3cd;
+      color: #333;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: bold;
+      z-index: 8;
+    }
+    #gameOver {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.9);
+      color: white;
+      font-size: 2rem;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      animation: fadeIn 1s;
+    }
+    #abilities {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      border: 2px solid #ccc;
+      padding: 10px;
+      border-radius: 10px;
+      display: flex;
+      gap: 10px;
+      z-index: 9;
+    }
+    .ability {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background: #007BFF;
+      color: white;
+    }
+    .ability:hover {
+      background: #0056b3;
+    }
+    @keyframes fadeIn {
+      from {opacity: 0;}
+      to {opacity: 1;}
+    }
+  </style>
 </head>
 <body>
-  <div class="quiz-container">
-    <h1>Science Quiz</h1>
-    <div id="question"></div>
-    <div id="options"></div>
-    <button id="submitBtn">Submit</button>
-    <div id="feedback"></div>
-    <div id="scoreboard">Score: 0 | Bulbs: 0</div>
+  <div id="intro">
+    <h1>Welcome to the Science Quiz!</h1>
+    <button id="startBtn">Start Game</button>
   </div>
-  <script src="script.js"></script>
-</body>
-</html>
+
+  <div id="gameOver">🛑 Game Over! Time's up.</div>
+  <div id="shop-container">💡 Bulbs: <span id="bulbCount">0</span></div>
+  <div id="timer">15</div>
+  <div id="streakDisplay">Streak: 0</div>
+
+  <div id="quiz">
+    <div id="scoreDisplay">Score: 0</div>
+    <div class="question" id="questionText"></div>
+    <div id="options"></div>
+    <button id="submit">Submit</button>
+    <div id="feedback"></div>
+  </div>
+
+  <div id="abilities">
+    <button class="ability" id="fiftyBtn">50:50 (10)</button>
+    <button class="ability" id="hintBtn">Hint (15)</button>
+    <button class="ability" id="skipBtn">🚌 Skip (40)</button>
+  </div>
+
+<script>
+const questionText = document.getElementById("questionText");
+const optionsEl = document.getElementById("options");
+const submitBtn = document.getElementById("submit");
+const feedback = document.getElementById("feedback");
+const scoreDisplay = document.getElementById("scoreDisplay");
+const bulbCountEl = document.getElementById("bulbCount");
+const timerEl = document.getElementById("timer");
+const streakDisplay = document.getElementById("streakDisplay");
+const gameOver = document.getElementById("gameOver");
+const startBtn = document.getElementById("startBtn");
+const intro = document.getElementById("intro");
+const quiz = document.getElementById("quiz");
+const shopDiv = document.getElementById("shop-container");
+const hintBtn = document.getElementById("hintBtn");
+const fiftyBtn = document.getElementById("fiftyBtn");
+const skipBtn = document.getElementById("skipBtn");
+
+let lvl = 0, qIdx = 0, selected = null, score = 0, bulbs = 0, streak = 0;
+let timer;
+
+const allLevelsPool = [
+  {
+    level: "Easy",
+    questions: [
+      { q: "What planet is known as the Red Planet?", o: ["Earth", "Mars", "Venus", "Jupiter"], a: "Mars" },
+      { q: "How many legs does an insect have?", o: ["4", "6", "8", "10"], a: "6" },
+      { q: "Which gas do plants absorb?", o: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Helium"], a: "Carbon Dioxide" },
+      { q: "What is the boiling point of water?", o: ["50°C", "100°C", "150°C", "200°C"], a: "100°C" },
+      { q: "What part of the cell contains DNA?", o: ["Cytoplasm", "Membrane", "Nucleus", "Ribosome"], a: "Nucleus" },
+      { q: "Which gas do humans breathe in to survive?", o: ["Carbon Dioxide", "Oxygen", "Hydrogen", "Nitrogen"], a: "Oxygen" },
+      { q: "What’s the closest planet to the sun?", o: ["Venus", "Earth", "Mercury", "Mars"], a: "Mercury" },
+      { q: "Which force keeps us on the ground?", o: ["Magnetism", "Friction", "Gravity", "Electricity"], a: "Gravity" },
+      { q: "What do bees collect and use to make honey?", o: ["Nectar", "Water", "Pollen", "Leaves"], a: "Nectar" },
+      { q: "Which organ pumps blood through the body?", o: ["Liver", "Lungs", "Heart", "Kidney"], a: "Heart" }
+    ]
+  },
+  {
+    level: "Medium",
+    questions: [
+      { q: "What is the chemical formula for water?", o: ["O2", "H2O", "CO2", "NaCl"], a: "H2O" },
+      { q: "What part of the plant absorbs water?", o: ["Stem", "Leaves", "Flowers", "Roots"], a: "Roots" },
+      { q: "What kind of animal is a frog?", o: ["Mammal", "Bird", "Reptile", "Amphibian"], a: "Amphibian" },
+      { q: "What is the largest planet?", o: ["Earth", "Mars", "Jupiter", "Saturn"], a: "Jupiter" },
+      { q: "What process do plants use to make food?", o: ["Digestion", "Respiration", "Photosynthesis", "Fermentation"], a: "Photosynthesis" },
+      { q: "What is the center of an atom called?", o: ["Electron", "Proton", "Nucleus", "Neutron"], a: "Nucleus" },
+      { q: "Which vitamin do we get from sunlight?", o: ["A", "B", "C", "D"], a: "D" },
+      { q: "Which blood cells fight infection?", o: ["Red", "White", "Platelets", "Plasma"], a: "White" },
+      { q: "Which part of the body controls everything?", o: ["Heart", "Brain", "Liver", "Lungs"], a: "Brain" },
+      { q: "What tool is used to measure temperature?", o: ["Barometer", "Thermometer", "Ruler", "Scale"], a: "Thermometer" }
+    ]
+  },
+  {
+    level: "Hard",
+    questions: [
+      { q: "Which metal is liquid at room temperature?", o: ["Gold", "Iron", "Mercury", "Copper"], a: "Mercury" },
+      { q: "What causes tides in the ocean?", o: ["Wind", "Rain", "Moon’s gravity", "Earthquakes"], a: "Moon’s gravity" },
+      { q: "What is the smallest unit of life?", o: ["Atom", "Molecule", "Cell", "Tissue"], a: "Cell" },
+      { q: "What’s the main gas in Earth’s atmosphere?", o: ["Oxygen", "Carbon Dioxide", "Hydrogen", "Nitrogen"], a: "Nitrogen" },
+      { q: "How many bones are in the adult human body?", o: ["106", "206", "306", "406"], a: "206" },
+      { q: "What is the hardest natural substance?", o: ["Gold", "Iron", "Diamond", "Steel"], a: "Diamond" },
+      { q: "Which planet has rings?", o: ["Venus", "Earth", "Saturn", "Mars"], a: "Saturn" },
+      { q: "What are animals with a backbone called?", o: ["Invertebrates", "Vertebrates", "Mammals", "Bacteria"], a: "Vertebrates" },
+      { q: "What organ filters blood in the body?", o: ["Heart", "Kidney", "Liver", "Lungs"], a: "Kidney" },
+      { q: "What type of energy does a moving object have?", o: ["Potential", "Static", "Kinetic", "Thermal"], a: "Kinetic" }
+    ]
+  },
+  {
+    level: "Extreme",
+    questions: [
+      { q: "What natural satellite orbits Earth?", o: ["Sun", "Mars", "Moon", "Venus"], a: "Moon" },
+      { q: "What gas do cars emit?", o: ["Oxygen", "Hydrogen", "Carbon Dioxide", "Helium"], a: "Carbon Dioxide" },
+      { q: "How many planets are in the Solar System?", o: ["7", "8", "9", "10"], a: "8" },
+      { q: "What state of matter is air?", o: ["Solid", "Liquid", "Gas", "Plasma"], a: "Gas" },
+      { q: "What is the primary source of energy for Earth?", o: ["Moon", "Volcanoes", "Sun", "Electricity"], a: "Sun" },
+      { q: "What planet is famous for its big red spot?", o: ["Venus", "Earth", "Jupiter", "Saturn"], a: "Jupiter" },
+      { q: "What device helps us see very small things?", o: ["Telescope", "Microscope", "Periscope", "Camera"], a: "Microscope" },
+      { q: "What do we call animals that eat only plants?", o: ["Carnivores", "Omnivores", "Herbivores", "Predators"], a: "Herbivores" },
+      { q: "Which organ helps humans breathe?", o: ["Liver", "Lungs", "Heart", "Stomach"], a: "Lungs" },
+      { q: "What planet is known for its rings?", o: ["Venus", "Earth", "Saturn", "Neptune"], a: "Saturn" }
+    ]
+  }
+];
+
+function startTimer() {
+  let timeLeft = 15;
+  timerEl.textContent = timeLeft;
+  timer = setInterval(() => {
+    timeLeft--;
+    timerEl.textContent = timeLeft;
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      quiz.style.display = 'none';
+      gameOver.style.display = 'flex';
+    }
+  }, 1000);
+}
+
+function resetTimer() {
+  clearInterval(timer);
+  startTimer();
+}
+
+function updateDisplay() {
+  scoreDisplay.textContent = `Score: ${score}`;
+  bulbCountEl.textContent = bulbs;
+  streakDisplay.textContent = `Streak: ${streak}`;
+}
+
+function showQuestion() {
+  const pool = allLevelsPool[lvl];
+  const current = pool.questions[qIdx];
+
+  questionText.textContent = current.q;
+  optionsEl.innerHTML = "";
+  feedback.textContent = "";
+  selected = null;
+  submitBtn.style.display = "none";
+
+  current.o.forEach(opt => {
+    const div = document.createElement("div");
+    div.textContent = opt;
+    div.className = "option";
+    div.onclick = () => {
+      selected = opt;
+      Array.from(optionsEl.children).forEach(c => c.style.background = "#e0e0e0");
+      div.style.background = "#90ee90";
+      submitBtn.style.display = "block";
+    };
+    optionsEl.appendChild(div);
+  });
+  resetTimer();
+}
+
+submitBtn.onclick = () => {
+  clearInterval(timer);
+  const correct = allLevelsPool[lvl].questions[qIdx].a;
+  if (selected === correct) {
+    feedback.textContent = "✅ Correct!";
+    score += 10;
+    bulbs += 5;
+    streak++;
+  } else {
+    feedback.textContent = `❌ Wrong! Answer: ${correct}`;
+    streak = 0;
+  }
+  updateDisplay();
+  qIdx++;
+  if (qIdx >= allLevelsPool[lvl].questions.length) {
+    lvl++;
+    qIdx = 0;
+    if (lvl >= allLevelsPool.length) {
+      feedback.textContent += " 🎉 Quiz Complete!";
+      return;
+    }
+  }
+  setTimeout(showQuestion, 1500);
+};
+
+hintBtn.onclick = () => {
+  if (bulbs >= 15) {
+    bulbs -= 15;
+    const correct = allLevelsPool[lvl].questions[qIdx].a;
+    Array.from(optionsEl.children).forEach(opt => {
+      if (opt.textContent === correct) {
+        opt.style.background = '#ffff99';
+      }
+    });
+    updateDisplay();
+  }
+};
+
+fiftyBtn.onclick = () => {
+  if (bulbs >= 10) {
+    bulbs -= 10;
+    const correct = allLevelsPool[lvl].questions[qIdx].a;
+    let removed = 0;
+    Array.from(optionsEl.children).forEach(opt => {
+      if (opt.textContent !== correct && removed < 2) {
+        opt.style.visibility = 'hidden';
+        removed++;
+      }
+    });
+    updateDisplay();
+  }
+};
+
+skipBtn.onclick = () => {
+  if (bulbs >= 40) {
+    bulbs -= 40;
+    qIdx++;
+    if (qIdx >= allLevelsPool[lvl].questions.length) {
+      lvl++;
+      qIdx = 0;
+      if (lvl >= allLevelsPool.length) {
+        feedback.textContent = "🎉 Quiz Complete!";
+        return;
+      }
+    }
+    updateDisplay();
+    showQuestion();
+  }
+};
+
+startBtn.onclick = () => {
+  intro.style.display = 'none';
+  quiz.style.display = 'block';
+  shopDiv.style.display = 'block';
+  timerEl.style.display = 'block';
+  streakDisplay.style.display = 'block';
+  updateDisplay();
+  showQuestion();
+};
+</script>
