@@ -1,7 +1,226 @@
-function showTime() {
-	document.getElementById('currentTime').innerHTML = new Date().toUTCString();
+/* General Reset */
+body, html {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background: #f0f0f0;
 }
-showTime();
-setInterval(function () {
-	showTime();
-}, 1000);
+
+/* Intro Screen */
+#intro {
+  position: fixed;
+  inset: 0;
+  background: #007BFF;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+  animation: fadeIn 1.5s;
+}
+
+/* Quiz Container */
+#quiz {
+  max-width: 600px;
+  margin: 80px auto;
+  padding: 20px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  position: relative;
+  display: none;
+}
+
+/* Option Styling */
+.option {
+  background: #e0e0e0;
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.option:hover {
+  background: #ccc;
+}
+
+/* Submit Button */
+#submit {
+  margin-top: 10px;
+  padding: 10px 20px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  display: none;
+}
+
+/* Feedback */
+#feedback {
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+/* Shop Container */
+#shop-container {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  background: #ffc107;
+  padding: 10px;
+  border-radius: 6px;
+  display: none;
+}
+
+/* Timer */
+#timer {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: #dc3545;
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  font-weight: bold;
+  display: none;
+}
+
+/* Streak Display */
+#streakDisplay {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff3cd;
+  color: #333;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  z-index: 8;
+  display: none;
+}
+
+/* Game Over Screen */
+#gameOver {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  font-size: 2rem;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 1s;
+}
+
+/* Abilities Container */
+#abilities {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  border: 2px solid #ccc;
+  padding: 10px;
+  border-radius: 10px;
+  display: flex;
+  gap: 10px;
+  z-index: 9;
+  display: none;
+}
+
+/* Ability Button */
+.ability {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  background: #007BFF;
+  color: white;
+}
+
+.ability:hover {
+  background: #0056b3;
+}
+
+/* Fade-In Animation */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Level Select Screen */
+#levelSelect {
+  position: fixed;
+  inset: 0;
+  background: #007BFF;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  z-index: 1000;
+}
+
+/* Level Select Title */
+#levelSelect h1 {
+  color: white;
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+
+#levelSelect h2 {
+  color: white;
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+}
+
+/* Level Buttons */
+#levelSelect button {
+  font-size: 1.2rem;
+  padding: 10px 20px;
+  background: white;
+  color: #007BFF;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#levelSelect button:hover {
+  background: #e0e0e0;
+}
+
+/* Level Complete Screen */
+#levelComplete {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  font-size: 2rem;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  z-index: 1000;
+  animation: fadeIn 1s;
+}
+
+/* Navigation Buttons */
+.navBtn {
+  padding: 8px 16px;
+  margin-top: 10px;
+  font-size: 1rem;
+  background: #007BFF;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.navBtn:hover {
+  background: #0056b3;
+}
+
