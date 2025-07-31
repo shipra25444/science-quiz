@@ -1,117 +1,142 @@
-/* Reset and base styling */
 body, html {
   margin: 0;
   padding: 0;
   font-family: Arial, sans-serif;
-  background: #007BFF; /* Bright blue background */
-  color: white;
-  height: 100%;
+  background: #f0f0f0;
 }
-
-/* Level selection container */
-#levelSelect {
+#intro, #levelComplete, #gameOver {
+  position: fixed;
+  inset: 0;
+  background: #007BFF;
+  color: white;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  text-align: center;
+  z-index: 999;
+  animation: fadeIn 1.5s;
 }
-
-/* Main title styling */
-.main-title {
-  font-size: 3rem;
-  font-weight: bold;
-  margin-bottom: 10px;
-  color: white;
-}
-
-/* Subheading */
-#levelSelect h2 {
-  font-size: 1.8rem;
-  margin-bottom: 20px;
-}
-
-/* Buttons for level selection */
-#levelSelect button {
-  font-size: 1.2rem;
-  padding: 10px 25px;
-  margin: 10px;
-  background: white;
-  color: #007BFF;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-#levelSelect button:hover {
-  background: #e0e0e0;
-}
-
-/* Quiz container (initially hidden) */
-#quiz {
+#levelSelection {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 40px;
-}
-
-/* Question text */
-#question {
-  font-size: 1.5rem;
-  margin-bottom: 20px;
-}
-
-/* Options list */
-#options button {
-  display: block;
-  margin: 8px 0;
-  padding: 10px 20px;
-  font-size: 1rem;
-  background: white;
-  color: #007BFF;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-#options button:hover {
-  background: #e0e0e0;
-}
-
-/* Navigation buttons (e.g., Next) */
-#navigation {
+  gap: 20px;
   margin-top: 20px;
 }
-
-/* Level Complete screen */
-#levelComplete {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  text-align: center;
+.levelBtn {
+  padding: 12px 24px;
+  font-size: 1rem;
+  border: none;
+  background: #ffc107;
+  color: black;
+  border-radius: 10px;
+  cursor: pointer;
 }
-
-#levelComplete h2 {
-  font-size: 2rem;
-  margin-bottom: 20px;
+.levelBtn:hover {
+  background: #e0a800;
 }
-
-#levelComplete button {
-  font-size: 1.2rem;
-  padding: 10px 25px;
-  margin: 10px;
+#quiz, #shop-container, #timer, #streakDisplay, #abilities {
+  display: none;
+}
+#quiz {
+  max-width: 600px;
+  margin: 80px auto;
+  padding: 20px;
   background: white;
-  color: #007BFF;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  position: relative;
+}
+.option {
+  background: #e0e0e0;
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.option:hover {
+  background: #ccc;
+}
+#submit {
+  margin-top: 10px;
+  padding: 10px 20px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  display: none;
+}
+#feedback {
+  margin-top: 10px;
+  font-weight: bold;
+}
+#shop-container {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  background: #ffc107;
+  padding: 10px;
+  border-radius: 6px;
+}
+#timer {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: #dc3545;
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  font-weight: bold;
+}
+#streakDisplay {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff3cd;
+  color: #333;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  z-index: 8;
+}
+#abilities {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  border: 2px solid #ccc;
+  padding: 10px;
+  border-radius: 10px;
+  display: flex;
+  gap: 10px;
+  z-index: 9;
+}
+.ability {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  background: #007BFF;
+  color: white;
+}
+.ability:hover {
+  background: #0056b3;
+}
+#levelComplete button {
+  margin-top: 10px;
+  padding: 10px 20px;
   border: none;
   border-radius: 8px;
+  background: #28a745;
+  color: white;
+  font-size: 1rem;
   cursor: pointer;
-  transition: background 0.3s ease;
 }
-
-#levelComplete button:hover {
-  background: #e0e0e0;
+#levelComplete button:last-child {
+  background: #dc3545;
+}
+@keyframes fadeIn {
+  from {opacity: 0;}
+  to {opacity: 1;}
 }
