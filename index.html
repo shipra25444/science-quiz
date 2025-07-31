@@ -14,20 +14,27 @@
   </div>
 
   <!-- Level Selection Screen -->
-  <div id="levelSelect">
-    <h1>Science Quiz</h1>
+ <div id="levelSelect">
+    <h1 class="main-title">Science Quiz</h1>
     <h2>Select a Level</h2>
-    <button class="navBtn" onclick="startQuiz(0)">Easy</button>
-    <button class="navBtn" onclick="startQuiz(1)">Medium</button>
-    <button class="navBtn" onclick="startQuiz(2)">Hard</button>
-    <button class="navBtn" onclick="startQuiz(3)">Extreme</button>
+    <button onclick="startQuiz('easy')">Easy</button>
+    <button onclick="startQuiz('medium')">Medium</button>
+    <button onclick="startQuiz('hard')">Hard</button>
+    <button onclick="startQuiz('extreme')">Extreme</button>
   </div>
 
-  <!-- Level Complete Screen -->
-  <div id="levelComplete">
-    <p>✅ Level Completed!</p>
-    <button class="navBtn" id="nextLevelBtn">Next Level</button>
-    <button class="navBtn" onclick="window.location.reload()">Exit to Home</button>
+<div id="quiz" style="display:none;">
+    <div id="question"></div>
+    <div id="options"></div>
+    <div id="navigation">
+      <button onclick="nextQuestion()">Next</button>
+    </div>
+  </div>
+
+  <div id="levelComplete" style="display:none;">
+    <h2>Level Complete!</h2>
+    <button onclick="goToNextLevel()">Next Level</button>
+    <button onclick="exitToHome()">Exit</button>
   </div>
 
   <!-- Game Over Screen -->
