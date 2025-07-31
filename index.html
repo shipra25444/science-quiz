@@ -1,281 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Science Quiz Game</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Science Quiz</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-  <!-- Intro Screen -->
   <div id="intro">
-    <h1>Welcome Science Masters!</h1>
-    <button id="levelSelectBtn">Choose Level</button>
-  </div>
-
-  <!-- Level Selection Screen -->
- <div id="levelSelect">
-    <h1 class="main-title">Science Quiz</h1>
-    <h2>Select a Level</h2>
-    <button onclick="startQuiz('easy')">Easy</button>
-    <button onclick="startQuiz('medium')">Medium</button>
-    <button onclick="startQuiz('hard')">Hard</button>
-    <button onclick="startQuiz('extreme')">Extreme</button>
-  </div>
-
-<div id="quiz" style="display:none;">
-    <div id="question"></div>
-    <div id="options"></div>
-    <div id="navigation">
-      <button onclick="nextQuestion()">Next</button>
+    <h1>SCIENCE QUIZ</h1>
+    <div id="levelSelection">
+      <button class="levelBtn" data-level="0">Level 1</button>
+      <button class="levelBtn" data-level="1">Level 2</button>
+      <button class="levelBtn" data-level="2">Level 3</button>
+      <button class="levelBtn" data-level="3">Level 4</button>
     </div>
   </div>
 
-  <div id="levelComplete" style="display:none;">
-    <h2>Level Complete!</h2>
-    <button onclick="goToNextLevel()">Next Level</button>
-    <button onclick="exitToHome()">Exit</button>
-  </div>
-
-  <!-- Game Over Screen -->
-  <div id="gameOver">🛑 Game Over! Time's up.</div>
-
-  <!-- UI Components -->
-  <div id="shop-container">💡 Bulbs: <span id="bulbCount">0</span></div>
-  <div id="timer">15</div>
-  <div id="streakDisplay">Streak: 0</div>
-
-  <!-- Quiz Container -->
   <div id="quiz">
-    <div id="scoreDisplay">Score: 0</div>
-    <div class="question" id="questionText"></div>
+    <h2 id="questionText">Question will appear here</h2>
     <div id="options"></div>
     <button id="submit">Submit</button>
     <div id="feedback"></div>
+    <div id="scoreDisplay">Score: 0</div>
   </div>
 
-  <!-- Abilities -->
+  <div id="shop-container">
+    💡 <span id="bulbCount">0</span>
+  </div>
+
+  <div id="timer">15</div>
+  <div id="streakDisplay">Streak: 0</div>
+
   <div id="abilities">
-    <button class="ability" id="fiftyBtn">50:50 (10)</button>
-    <button class="ability" id="hintBtn">Hint (15)</button>
-    <button class="ability" id="skipBtn">🚌 Skip (35)</button>
+    <button class="ability" id="hintBtn">Hint (15💡)</button>
+    <button class="ability" id="fiftyBtn">50:50 (10💡)</button>
+    <button class="ability" id="skipBtn">Skip (40💡)</button>
   </div>
 
-  <!-- Script -->
+  <div id="levelComplete">
+    <h2>Level Complete!</h2>
+    <button id="nextLevelBtn">Next Level</button>
+    <button id="exitBtn">Exit</button>
+  </div>
+
+  <div id="gameOver">
+    <h2>Game Over!</h2>
+    <button onclick="location.reload()">Try Again</button>
+  </div>
+
   <script>
-    const questionText = document.getElementById("questionText");
-    const optionsEl = document.getElementById("options");
-    const submitBtn = document.getElementById("submit");
-    const feedback = document.getElementById("feedback");
-    const scoreDisplay = document.getElementById("scoreDisplay");
-    const bulbCountEl = document.getElementById("bulbCount");
-    const timerEl = document.getElementById("timer");
-    const streakDisplay = document.getElementById("streakDisplay");
-    const gameOver = document.getElementById("gameOver");
-    const intro = document.getElementById("intro");
-    const quiz = document.getElementById("quiz");
-    const shopDiv = document.getElementById("shop-container");
-    const hintBtn = document.getElementById("hintBtn");
-    const fiftyBtn = document.getElementById("fiftyBtn");
-    const skipBtn = document.getElementById("skipBtn");
-    const levelSelect = document.getElementById("levelSelect");
-    const levelComplete = document.getElementById("levelComplete");
-
-    let lvl = 0, qIdx = 0, selected = null, score = 0, bulbs = 0, streak = 0;
-    let timer;
-
     const allLevelsPool = [
       {
-        level: "Easy",
         questions: [
-          { q: "What planet is known as the Red Planet?", o: ["Earth", "Mars", "Venus", "Jupiter"], a: "Mars" },
-          { q: "How many legs does an insect have?", o: ["4", "6", "8", "10"], a: "6" },
-          { q: "Which gas do plants absorb?", o: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Helium"], a: "Carbon Dioxide" },
-          { q: "What is the boiling point of water?", o: ["50°C", "100°C", "150°C", "200°C"], a: "100°C" },
-          { q: "What part of the cell contains DNA?", o: ["Cytoplasm", "Membrane", "Nucleus", "Ribosome"], a: "Nucleus" }
+          { q: "What planet is known as the Red Planet?", o: ["Earth", "Mars", "Jupiter", "Venus"], a: "Mars" },
+          { q: "What gas do plants absorb from the atmosphere?", o: ["Oxygen", "Nitrogen", "Carbon Dioxide", "Hydrogen"], a: "Carbon Dioxide" },
+          { q: "How many legs does a spider have?", o: ["6", "8", "10", "12"], a: "8" },
+          { q: "What is the boiling point of water?", o: ["90°C", "100°C", "110°C", "120°C"], a: "100°C" },
+          { q: "What part of the cell contains DNA?", o: ["Nucleus", "Cytoplasm", "Membrane", "Ribosome"], a: "Nucleus" }
         ]
       },
       {
-        level: "Medium",
         questions: [
-          { q: "What is the chemical formula for water?", o: ["O2", "H2O", "CO2", "NaCl"], a: "H2O" },
-          { q: "What part of the plant absorbs water?", o: ["Stem", "Leaves", "Flowers", "Roots"], a: "Roots" },
-          { q: "What kind of animal is a frog?", o: ["Mammal", "Bird", "Reptile", "Amphibian"], a: "Amphibian" },
-          { q: "What is the largest planet?", o: ["Earth", "Mars", "Jupiter", "Saturn"], a: "Jupiter" },
-          { q: "What process do plants use to make food?", o: ["Digestion", "Respiration", "Photosynthesis", "Fermentation"], a: "Photosynthesis" }
+          { q: "What is H2O more commonly known as?", o: ["Salt", "Hydrogen", "Water", "Oxygen"], a: "Water" },
+          { q: "Which organ pumps blood throughout the body?", o: ["Lungs", "Liver", "Heart", "Kidney"], a: "Heart" },
+          { q: "What part of the plant conducts photosynthesis?", o: ["Root", "Stem", "Flower", "Leaf"], a: "Leaf" },
+          { q: "Which gas is most abundant in the Earth's atmosphere?", o: ["Oxygen", "Nitrogen", "Carbon Dioxide", "Helium"], a: "Nitrogen" },
+          { q: "What force pulls objects toward Earth's center?", o: ["Magnetism", "Electricity", "Friction", "Gravity"], a: "Gravity" }
         ]
       },
       {
-        level: "Hard",
         questions: [
-          { q: "Which metal is liquid at room temperature?", o: ["Gold", "Iron", "Mercury", "Copper"], a: "Mercury" },
-          { q: "What causes tides in the ocean?", o: ["Wind", "Rain", "Moon’s gravity", "Earthquakes"], a: "Moon’s gravity" },
-          { q: "What is the smallest unit of life?", o: ["Atom", "Molecule", "Cell", "Tissue"], a: "Cell" },
-          { q: "What’s the main gas in Earth’s atmosphere?", o: ["Oxygen", "Carbon Dioxide", "Hydrogen", "Nitrogen"], a: "Nitrogen" },
-          { q: "How many bones are in the adult human body?", o: ["106", "206", "306", "406"], a: "206" }
+          { q: "Which part of the human brain controls balance?", o: ["Cerebrum", "Cerebellum", "Medulla", "Pons"], a: "Cerebellum" },
+          { q: "What is the powerhouse of the cell?", o: ["Nucleus", "Ribosome", "Mitochondria", "Golgi body"], a: "Mitochondria" },
+          { q: "Which vitamin is produced in the skin in sunlight?", o: ["A", "B12", "C", "D"], a: "D" },
+          { q: "What is the chemical symbol for gold?", o: ["G", "Go", "Au", "Ag"], a: "Au" },
+          { q: "What type of energy does a moving object have?", o: ["Potential", "Kinetic", "Thermal", "Sound"], a: "Kinetic" }
         ]
       },
       {
-        level: "Extreme",
         questions: [
-          { q: "What natural satellite orbits Earth?", o: ["Sun", "Mars", "Moon", "Venus"], a: "Moon" },
-          { q: "What gas do cars emit?", o: ["Oxygen", "Hydrogen", "Carbon Dioxide", "Helium"], a: "Carbon Dioxide" },
-          { q: "How many planets are in the Solar System?", o: ["7", "8", "9", "10"], a: "8" },
-          { q: "What state of matter is air?", o: ["Solid", "Liquid", "Gas", "Plasma"], a: "Gas" },
-          { q: "What is the primary source of energy for Earth?", o: ["Moon", "Volcanoes", "Sun", "Electricity"], a: "Sun" }
+          { q: "What particle has a negative charge?", o: ["Proton", "Electron", "Neutron", "Nucleus"], a: "Electron" },
+          { q: "What is Newton's third law?", o: ["F=ma", "An object at rest...", "Every action has an equal and opposite reaction", "Energy can't be created nor destroyed"], a: "Every action has an equal and opposite reaction" },
+          { q: "What organ filters blood in the human body?", o: ["Heart", "Kidney", "Liver", "Lungs"], a: "Kidney" },
+          { q: "What is the largest planet in our solar system?", o: ["Earth", "Saturn", "Jupiter", "Neptune"], a: "Jupiter" },
+          { q: "Which metal is liquid at room temperature?", o: ["Iron", "Mercury", "Aluminum", "Zinc"], a: "Mercury" }
         ]
       }
     ];
-
-    document.getElementById("levelSelectBtn").onclick = () => {
-      intro.style.display = 'none';
-      levelSelect.style.display = 'flex';
-    };
-
-    function startQuiz(levelIndex) {
-      lvl = levelIndex;
-      qIdx = 0;
-      score = 0;
-      bulbs = 0;
-      streak = 0;
-      levelSelect.style.display = 'none';
-      quiz.style.display = 'block';
-      shopDiv.style.display = 'block';
-      timerEl.style.display = 'block';
-      streakDisplay.style.display = 'block';
-      updateDisplay();
-      showQuestion();
-    }
-
-    function startTimer() {
-      let timeLeft = 15;
-      timerEl.textContent = timeLeft;
-      timer = setInterval(() => {
-        timeLeft--;
-        timerEl.textContent = timeLeft;
-        if (timeLeft <= 0) {
-          clearInterval(timer);
-          quiz.style.display = 'none';
-          gameOver.style.display = 'flex';
-        }
-      }, 1000);
-    }
-
-    function resetTimer() {
-      clearInterval(timer);
-      startTimer();
-    }
-
-    function updateDisplay() {
-      scoreDisplay.textContent = `Score: ${score}`;
-      bulbCountEl.textContent = bulbs;
-      streakDisplay.textContent = `Streak: ${streak}`;
-    }
-
-    function showQuestion() {
-      const pool = allLevelsPool[lvl];
-      const current = pool.questions[qIdx];
-
-      questionText.textContent = current.q;
-      optionsEl.innerHTML = "";
-      feedback.textContent = "";
-      selected = null;
-      submitBtn.style.display = "none";
-
-      current.o.forEach(opt => {
-        const div = document.createElement("div");
-        div.textContent = opt;
-        div.className = "option";
-        div.onclick = () => {
-          selected = opt;
-          Array.from(optionsEl.children).forEach(c => c.style.background = "#e0e0e0");
-          div.style.background = "#90ee90";
-          submitBtn.style.display = "block";
-        };
-        optionsEl.appendChild(div);
-      });
-      resetTimer();
-    }
-
-    submitBtn.onclick = () => {
-      clearInterval(timer);
-      const correct = allLevelsPool[lvl].questions[qIdx].a;
-      if (selected === correct) {
-        feedback.textContent = "✅ Correct!";
-        score += 10;
-        bulbs += 5;
-        streak++;
-      } else {
-        feedback.textContent = `❌ Wrong! Answer: ${correct}`;
-        streak = 0;
-      }
-      updateDisplay();
-      qIdx++;
-      if (qIdx >= allLevelsPool[lvl].questions.length) {
-        if (lvl + 1 < allLevelsPool.length) {
-          quiz.style.display = 'none';
-          levelComplete.style.display = 'flex';
-          document.getElementById("nextLevelBtn").onclick = () => {
-            lvl++;
-            qIdx = 0;
-            levelComplete.style.display = 'none';
-            quiz.style.display = 'block';
-            updateDisplay();
-            showQuestion();
-          };
-          return;
-        } else {
-          feedback.textContent += " 🎉 Quiz Complete!";
-          return;
-        }
-      }
-      setTimeout(showQuestion, 1500);
-    };
-
-    hintBtn.onclick = () => {
-      if (bulbs >= 15) {
-        bulbs -= 15;
-        const correct = allLevelsPool[lvl].questions[qIdx].a;
-        Array.from(optionsEl.children).forEach(opt => {
-          if (opt.textContent === correct) {
-            opt.style.background = '#ffff99';
-          }
-        });
-        updateDisplay();
-      }
-    };
-
-    fiftyBtn.onclick = () => {
-      if (bulbs >= 10) {
-        bulbs -= 10;
-        const correct = allLevelsPool[lvl].questions[qIdx].a;
-        let removed = 0;
-        Array.from(optionsEl.children).forEach(opt => {
-          if (opt.textContent !== correct && removed < 2) {
-            opt.style.visibility = 'hidden';
-            removed++;
-          }
-        });
-        updateDisplay();
-      }
-    };
-
-    skipBtn.onclick = () => {
-      if (bulbs >= 40) {
-        bulbs -= 40;
-        qIdx++;
-        if (qIdx >= allLevelsPool[lvl].questions.length) {
-          lvl++;
-          qIdx = 0;
-          if (lvl >= allLevelsPool.length) {
-            feedback.textContent = "🎉 Quiz Complete!";
-            return;
-          }
-        }
-        updateDisplay();
-        showQuestion();
-      }
-    };
   </script>
+  <script src="script.js"></script>
 </body>
 </html>
